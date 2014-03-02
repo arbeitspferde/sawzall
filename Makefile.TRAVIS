@@ -1,13 +1,13 @@
 # -*- mode: makefile; -*-
 
-AG_INSTALL ?= sudo apt-get install --yes
+export AG_INSTALL ?= sudo apt-get install --yes
 
-SANDBOX ?= $(PWD)/.sandbox
+export SANDBOX ?= $(PWD)/.sandbox
 
-ARCHIVES ?= $(SANDBOX)/archives
-BUILD ?= $(SANDBOX)/build
-ROOT ?= $(SANDBOX)/root
-STAMPS ?= $(SANDBOX)/stamps
+export ARCHIVES ?= $(SANDBOX)/archives
+export BUILD ?= $(SANDBOX)/build
+export ROOT ?= $(SANDBOX)/root
+export STAMPS ?= $(SANDBOX)/stamps
 
 export PATH := $(ROOT)/bin:$(PATH)
 export CPPFLAGS := $(CPPFLAGS) -I$(ROOT)/include
