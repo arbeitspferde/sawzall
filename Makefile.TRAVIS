@@ -18,6 +18,9 @@ export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):$(ROOT)/lib
 
 all: test
 
+clean:
+	$(MAKE) -C test clean
+
 test: $(STAMPS)/sawzall
 	$(MAKE) -C test
 
@@ -52,4 +55,4 @@ $(STAMPS)/sawzall: $(SANDBOX) $(STAMPS)/protocol-buffer-tools $(STAMPS)/libicu-d
 $(ARCHIVES)/protobuf-2.5.0.tar.bz2: $(SANDBOX)
 	wget --no-use-server-timestamp https://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2 -O $@
 
-.PHONY: test
+.PHONY: clean test
