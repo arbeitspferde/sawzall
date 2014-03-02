@@ -1,0 +1,15 @@
+*.la
+*.lo
+*.o
+.sandbox
+Makefile
+config.h
+config.log
+config.status
+libtool
+src/.deps/
+src/.libs/
+src/Makefile
+src/protoc-gen-szl
+src/szl
+stamp-h1

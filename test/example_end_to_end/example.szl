@@ -1,0 +1,7 @@
+topwords: table top(3) of word: string weight count: int;
+fields: array of bytes = splitcsvline(input);
+w: string = string(fields[0]);
+c: int = int(string(fields[1]), 10);
+if (c != 0) {
+  emit topwords <- w weight c;
+}
