@@ -1,0 +1,54 @@
+# -*- mode: makefile; -*-
+
+AG_INSTALL ?= sudo apt-get install --yes
+
+SANDBOX ?= $(PWD)/.sandbox
+
+ARCHIVES ?= $(SANDBOX)/archives
+BUILD ?= $(SANDBOX)/build
+ROOT ?= $(SANDBOX)/root
+STAMPS ?= $(SANDBOX)/stamps
+
+export PATH := $(ROOT)/bin:$(PATH)
+export CPPFLAGS := $(CPPFLAGS) -I$(ROOT)/include
+export CFLAGS := $(CFLAGS) -I$(ROOT)/include
+export CXXFLAGS := $(CXXFLAGS) -I$(ROOT)/include
+export LDFLAGS := $(LDFLAGS) -L$(ROOT)/lib
+export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):$(ROOT)/lib
+
+all: test
+
+test: $(STAMPS)/sawzall
+
+$(SANDBOX):
+	mkdir -vp $(SANDBOX)
+	mkdir -vp $(ARCHIVES)
+	mkdir -vp $(BUILD)
+	mkdir -vp $(ROOT)
+	mkdir -vp $(STAMPS)
+
+$(STAMPS)/build-tools: $(SANDBOX)
+	$(AG_INSTALL) build-essential
+	touch $@
+
+$(STAMPS)/libicu-dev: $(SANDBOX)
+	$(AG_INSTALL) libicu-dev
+	touch $@
+
+$(STAMPS)/protocol-buffer-tools: $(SANDBOX) $(STAMPS)/build-tools $(ARCHIVES)/protobuf-2.5.0.tar.bz2
+	cd $(BUILD) && tar xjvf $(ARCHIVES)/protobuf-2.5.0.tar.bz2
+	cd $(BUILD)/protobuf-2.5.0 && ./configure --prefix=$(ROOT)
+	cd $(BUILD)/protobuf-2.5.0 && make
+	cd $(BUILD)/protobuf-2.5.0 && make install
+	touch $@
+
+$(STAMPS)/sawzall: $(SANDBOX) $(STAMPS)/protocol-buffer-tools $(STAMPS)/libicu-dev
+	./configure --prefix=$(ROOT)
+	make
+	make install
+	touch $@
+
+$(ARCHIVES)/protobuf-2.5.0.tar.bz2: $(SANDBOX)
+	wget --no-use-server-timestamp https://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2 -O $@
+
+.PHONY: test
