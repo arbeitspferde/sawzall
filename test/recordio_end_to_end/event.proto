@@ -1,0 +1,11 @@
+message Request {
+  message Header {
+    optional string name  = 1;
+    optional string value = 2;
+  }
+
+  optional int64  time       = 1;
+  optional string path       = 2;
+  repeated Header header     = 3;
+  optional int32  latency_ms = 4;
+}

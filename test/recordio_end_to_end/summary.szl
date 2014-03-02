@@ -1,0 +1,68 @@
+proto "event.proto";
+
+
+# BEGIN: Table Definitions
+# See https://code.google.com/p/szl/wiki/Sawzall_Table_Types for more
+# information.
+
+# resource request counts indexed by path/resource name
+resource_requests:
+    table sum[resource: string] of count: int;
+# resource request counts indexed by double of (path, user agent)
+resource_requests_by_agent:
+    table sum[resource: string][agent: string] of count: int;
+# min, median, and maximum indexed by path name
+resource_latencies:
+    table quantile(3)[resource: string] of ms: int;
+
+# END: Table Definitions
+
+
+# BEGIN: Input Conversion
+# More would occur here, such as checking incoming message validity!
+# See event.proto for the data model definition for this.
+# szl --program summary.szl implicitly inlines data model definition in
+# native Sawzall tuples.  This can be visualized with --print_source=true
+# option and primarily protoc --szl_out=.
+
+request: Request = input;
+
+# END: Input Conversion
+
+
+# BEGIN: Local Variable Definition
+# It is customary in Sawzall to define output variables shortly before business
+# logic.  No state is persisted between processing of a single record!
+
+resource: string = request.path;
+agent: string = "";
+latency: int = request.latency_ms;
+
+# END: Local Variable Definition
+
+
+# BEGIN: Business Logic Processing
+
+for (i: int = 0; i < len(request.header); i++) {
+  header: Request.Header = request.header[i];
+  if (header.name == "User-Agent") {
+    agent = header.value;
+  }
+}
+
+if (agent != "") {
+   agent = "<UNKNOWN>";
+}
+
+# END: Business Logic Processing
+
+
+# BEGIN: Emit Output for Table Aggregators
+
+emit resource_requests_by_agent[resource][agent] <- 1;
+
+emit resource_requests[resource] <- 1;
+
+emit resource_latencies[resource] <- latency;
+
+# END: Emit Output for Table Aggregators
