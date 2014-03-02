@@ -2,7 +2,7 @@
 *.lo
 *.o
 .sandbox
-Makefile
+./Makefile
 config.h
 config.log
 config.status

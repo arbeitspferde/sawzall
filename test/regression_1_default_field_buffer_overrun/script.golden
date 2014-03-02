@@ -1,0 +1,1 @@
+type Foo = parsedmessage {some_field: int = 1000 @ 1 : int32};
