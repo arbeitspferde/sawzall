@@ -50,7 +50,7 @@ for (i: int = 0; i < len(request.header); i++) {
   }
 }
 
-if (agent != "") {
+if (agent == "") {
    agent = "<UNKNOWN>";
 }
 
