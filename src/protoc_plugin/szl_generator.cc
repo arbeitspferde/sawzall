@@ -1,11 +1,11 @@
 // Copyright 2010 Google Inc.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,9 +17,9 @@
 
 #include <utility>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
@@ -74,7 +74,7 @@ namespace {
 
 // see scanner.h
 // List of proper keywords and Sawzall basic types.
-static const char* const keywords[] = {
+static const string keywords[] = {
   // scanner.h defines a predicate IsKeyword()
   // that will be true for these identifers - we could use
   // that function but we don't because we
@@ -133,7 +133,8 @@ static const char* const keywords[] = {
   "when",
   "while"
 };
-const int kNumKeywords = sizeof(keywords) / sizeof(keywords[0]);
+static const int kNumKeywords = sizeof(keywords) / sizeof(keywords[0]);
+static const set<string> keywordSet(keywords, keywords+kNumKeywords);
 
 static set<string> mapped_names;
 
@@ -165,8 +166,7 @@ static void WarnAboutRenames() {
 
 // Name, making sure not to use a keyword
 static string NonKeyWord(const string& s) {
-  if (binary_search(&keywords[0], &keywords[kNumKeywords],
-                    s.c_str(), SzlStrlt())) {
+  if (keywordSet.find(s) != keywordSet.end()) {
     mapped_names.insert(s);
     return s + "_";
   }
@@ -338,8 +338,9 @@ void SzlGenerator::PrintTopLevelEnums() const {
   vector<pair<string, int> > top_level_enum_values;
   for (int i = 0; i < file_->enum_type_count(); ++i) {
     const EnumDescriptor& enum_descriptor = *file_->enum_type(i);
+    const string name = DottedNonKeyWord(enum_descriptor.full_name());
     printer_->Print("type $name$ = parsedmessage {\n",
-                    "name", enum_descriptor.full_name());
+                    "name", name);
     printer_->Indent();
     set<string> nontype_names;
     RenamedEnums renamed_enums;
@@ -458,10 +459,10 @@ void SzlGenerator::PrintClass(
     const Descriptor& message_descriptor,
     int depth,
     RenamedEnums* renamed_enums) const {
-  string type = (depth == 0) ? "parsedmessage " : "";
+  const string type = (depth == 0) ? "parsedmessage " : "";
   string name;
-  name = (depth == 0) ?
-      message_descriptor.full_name() : message_descriptor.name();
+  name = DottedNonKeyWord((depth == 0) ?
+      message_descriptor.full_name() : message_descriptor.name());
   printer_->Print("type $name$ = $type${\n", "name", name, "type", type);
   printer_->Indent();
   PrintEnums(message_descriptor, renamed_enums);
